@@ -1,73 +1,34 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
-import db from "@/lib/db";
+import { createEntry, listEntries, validateEntry } from "@/lib/vault";
+import { badRequest, getUserId, json, readJson, serverError, unauthorized } from "@/lib/session";
 
+// GET /api/vault  -> every entry for the signed-in user, without passwords
 export async function GET() {
+  try {
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
-    try {
+    const passwords = await listEntries(userId);
+    return json({ success: true, passwords });
+  } catch (err) {
+    return serverError(err);
+  }
+}
 
-        const cookieStore = await cookies();
+// POST /api/vault  -> save a new entry (password and notes are encrypted)
+export async function POST(request) {
+  try {
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
-        const token = cookieStore.get("token")?.value;
+    const body = await readJson(request);
+    if (!body) return badRequest("Send the entry as JSON.");
 
-        if (!token) {
+    const { values, error } = validateEntry(body);
+    if (error) return badRequest(error);
 
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Unauthorized"
-                },
-                {
-                    status: 401
-                }
-            );
-
-        }
-
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        const result = await db.query(
-
-            `SELECT
-                id,
-                website,
-                username,
-                password
-             FROM passwords
-             WHERE user_id=$1
-             ORDER BY website ASC`,
-
-            [decoded.id]
-
-        );
-
-        return NextResponse.json({
-
-            success: true,
-            passwords: result.rows
-
-        });
-
-    }
-
-    catch(err){
-
-        console.log(err);
-
-        return NextResponse.json(
-            {
-                success:false,
-                message:"Server Error"
-            },
-            {
-                status:500
-            }
-        );
-
-    }
-
+    const id = await createEntry(userId, values);
+    return json({ success: true, message: "Password saved.", id }, 201);
+  } catch (err) {
+    return serverError(err);
+  }
 }

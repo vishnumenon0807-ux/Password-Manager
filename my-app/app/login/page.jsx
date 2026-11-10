@@ -1,87 +1,16 @@
-"use client";
-import {useState} from "react";
-import "./login.css";
+import { redirect } from "next/navigation";
+import AuthForm from "@/components/AuthForm";
+import { googleEnabled } from "@/lib/auth";
+import { getUserId } from "@/lib/session";
 
-export default function LoginPage(){
-    const[email,setEmail]=useState("");
-    const[password,setPassword]=useState("");
+export const metadata = { title: "Login | PassVault" };
 
-    async function handleClick(e){
-        e.preventDefault();
-        try{
-            const response=await fetch("/api/login",{
-                 method:"POST",
-                 headers:{
-                    "content-type":"application/json"
-                 },
-                 body:JSON.stringify({
-                    email,
-                    password
-                 })
-            });
-            const data = await response.json();
+export default async function LoginPage({ searchParams }) {
+  if (await getUserId()) redirect("/dashboard");
 
-            if(response.ok){
+  // NextAuth sends errors back here as ?error=..., e.g. after a failed
+  // Google sign-in. searchParams is a Promise in Next.js 16.
+  const { error } = await searchParams;
 
-                alert("Login Successful");
-
-                console.log(data);
-
-            }
-            else{
-
-                alert(data.message);
-
-            }
-
-        
-        }
-        catch(err){
-
-            console.log(err);
-            alert("Something went wrong.");
-
-        }
-    }
-    return(
-        <>
-         <div className="container">
-            <form onSubmit={handleClick} className="login-box">
-                  <h1>Login</h1>
-
-                <input
-                    type="email"
-                    placeholder="Enter Email"
-                    value={email}
-                    onChange={(e)=>setEmail(e.target.value)}
-                    required
-                />
-
-                <input
-                    type="password"
-                    placeholder="Enter Password"
-                    value={password}
-                    onChange={(e)=>setPassword(e.target.value)}
-                    required
-                />
-
-                <button type="submit">
-
-                    Login
-
-                </button>
-
-                <br/><br/>
-                    <center>
-                    <a href="/signup">
-
-                        Sign Up
-
-                    </a>
-                    </center>
-               
-            </form>
-         </div> 
-        </>
-    );
+  return <AuthForm mode="login" googleEnabled={googleEnabled} initialError={error} />;
 }

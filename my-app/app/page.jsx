@@ -1,46 +1,62 @@
 import Link from "next/link";
+import { getUserId } from "@/lib/session";
 
-export default function Home() {
+export default async function Home() {
+  const signedIn = Boolean(await getUserId());
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white">
 
       {/* Navbar */}
 
-      <nav className="flex items-center justify-between px-10 py-6">
+      <nav className="flex items-center justify-between px-6 sm:px-10 py-6">
 
         <h1 className="text-3xl font-bold text-cyan-400">
           🔐 PassVault
         </h1>
 
-        <div className="flex items-center gap-6">
+        {signedIn ? (
 
           <Link
-            href="/login"
-            className="hover:text-cyan-400 transition"
-          >
-            Login
-          </Link>
-
-          <Link
-            href="/signup"
+            href="/dashboard"
             className="bg-cyan-500 hover:bg-cyan-600 px-5 py-2 rounded-lg transition"
           >
-            Sign Up
+            Open Dashboard
           </Link>
 
-        </div>
+        ) : (
+
+          <div className="flex items-center gap-6">
+
+            <Link
+              href="/login"
+              className="hover:text-cyan-400 transition"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/signup"
+              className="bg-cyan-500 hover:bg-cyan-600 px-5 py-2 rounded-lg transition"
+            >
+              Sign Up
+            </Link>
+
+          </div>
+
+        )}
 
       </nav>
 
       {/* Hero */}
 
-      <section className="max-w-7xl mx-auto px-10 py-20 flex flex-col lg:flex-row items-center justify-between gap-16">
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 py-20 flex flex-col lg:flex-row items-center justify-between gap-16">
 
         {/* Left */}
 
         <div className="max-w-xl">
 
-          <h1 className="text-6xl font-extrabold leading-tight">
+          <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight">
 
             Keep Your
             <span className="text-cyan-400"> Passwords </span>
@@ -50,16 +66,16 @@ export default function Home() {
 
           <p className="mt-8 text-lg text-gray-300 leading-8">
 
-            Store, organize and access all your passwords securely.
-            Your credentials are protected and available whenever
-            you need them.
+            Store, organise and access all your passwords in one place.
+            Every saved password and note is encrypted with AES-256-GCM
+            before it reaches the database.
 
           </p>
 
           <div className="mt-10 flex gap-5">
 
             <Link
-              href="/signup"
+              href={signedIn ? "/dashboard" : "/signup"}
               className="bg-cyan-500 hover:bg-cyan-600 px-7 py-4 rounded-xl font-semibold transition"
             >
               Get Started
@@ -103,11 +119,14 @@ export default function Home() {
 
           </div>
 
-          <button className="mt-8 w-full bg-cyan-500 hover:bg-cyan-600 py-3 rounded-xl font-semibold transition">
+          <Link
+            href={signedIn ? "/vault" : "/login"}
+            className="mt-8 block w-full text-center bg-cyan-500 hover:bg-cyan-600 py-3 rounded-xl font-semibold transition"
+          >
 
             Open Vault
 
-          </button>
+          </Link>
 
         </div>
 
@@ -115,7 +134,7 @@ export default function Home() {
 
       {/* Features */}
 
-      <section className="max-w-7xl mx-auto px-10 pb-24">
+      <section className="max-w-7xl mx-auto px-6 sm:px-10 pb-24">
 
         <h2 className="text-4xl font-bold text-center mb-14">
 
@@ -134,7 +153,7 @@ export default function Home() {
             </h3>
 
             <p className="text-gray-300">
-              Store passwords safely using modern encryption.
+              AES-256-GCM encryption for every password and note.
             </p>
 
           </div>
@@ -148,7 +167,7 @@ export default function Home() {
             </h3>
 
             <p className="text-gray-300">
-              Retrieve your credentials instantly.
+              Search, filter by category and copy in one click.
             </p>
 
           </div>
@@ -176,7 +195,7 @@ export default function Home() {
             </h3>
 
             <p className="text-gray-300">
-              Your vault is accessible only to you.
+              Your vault is visible only to your account.
             </p>
 
           </div>

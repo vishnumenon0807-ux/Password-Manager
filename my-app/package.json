@@ -1,15 +1,21 @@
 {
-  "name": "my-app",
+  "name": "passvault",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:setup": "node --env-file=.env.local scripts/setup-db.mjs",
+    "gen-keys": "node scripts/gen-keys.mjs"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "geist": "^1.9.2",
     "next": "16.2.9",
+    "next-auth": "^4.24.15",
+    "pg": "^8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -22,5 +28,8 @@
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }
